@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🍺 Ma Cave à Bière</title>
+<style>
+  :root{
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --neon-amber: #ffb627;
+    --neon-pink: #ff2e9a;
+    --neon-blue: #2ee6ff;
+    --wood: #2a1c14;
+    --wood-dark: #1a110c;
+    --card-bg: #20140d;
+    --text: #f4e6d0;
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height: 100%;
+    font-family: 'Georgia', 'Trebuchet MS', serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,46,154,0.08), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(46,230,255,0.08), transparent 40%),
+      repeating-linear-gradient(0deg, var(--wood-dark) 0px, var(--wood-dark) 2px, var(--wood) 2px, var(--wood) 42px),
+      var(--wood);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .brick-overlay{
+    position: relative;
+  }
+  header{
+    text-align:center;
+    padding: 28px 16px 18px;
+  }
+  h1{
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    font-size: clamp(28px, 8vw, 48px);
+    letter-spacing: 2px;
+    margin: 0;
+    color: var(--neon-amber);
+    text-shadow:
+      0 0 5px var(--neon-amber),
+      0 0 15px var(--neon-amber),
+      0 0 30px rgba(255,182,39,0.6),
+      0 0 60px rgba(255,182,39,0.3);
+    animation: flicker 4s infinite alternate;
+  }
+  .subtitle{
+    color: var(--neon-blue);
+    text-shadow: 0 0 6px var(--neon-blue), 0 0 14px rgba(46,230,255,0.5);
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  @keyframes flicker{
+    0%,19%,21%,23%,25%,54%,56%,100%{ opacity:1; }
+    20%,24%,55%{ opacity:0.75; }
+  }
+  .container{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 14px 60px;
+  }
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap: wrap;
+    justify-content:center;
+    margin-bottom: 20px;
+  }
+  .neon-btn{
+    background: transparent;
+    border: 2px solid var(--neon-pink);
+    color: var(--neon-pink);
+    text-shadow: 0 0 6px var(--neon-pink);
+    box-shadow: 0 0 8px rgba(255,46,154,0.5), inset 0 0 8px rgba(255,46,154,0.15);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all .2s ease;
+    font-family: inherit;
+  }
+  .neon-btn:hover{
+    background: rgba(255,46,154,0.15);
+    transform: translateY(-1px);
+  }
+  .neon-btn.blue{
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    text-shadow: 0 0 6px var(--neon-blue);
+    box-shadow: 0 0 8px rgba(46,230,255,0.5), inset 0 0 8px rgba(46,230,255,0.15);
+  }
+  .neon-btn.blue:hover{ background: rgba(46,230,255,0.15); }
+
+  .filters{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom: 22px;
+  }
+  select, input[type="text"]{
+    background: var(--card-bg);
+    border: 1px solid #5a4128;
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+  }
+  .card{
+    background: linear-gradient(160deg, var(--card-bg), #150d08);
+    border: 1px solid #4a3620;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,182,39,0.05);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.6), 0 0 18px rgba(255,182,39,0.15);
+  }
+  .card-photo{
+    width:100%;
+    height: 160px;
+    object-fit: cover;
+    display:block;
+    background: #0f0a06 center/cover;
+    border-bottom: 2px solid var(--neon-amber);
+  }
+  .card-photo.placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 46px;
+  }
+  .card-body{
+    padding: 12px 14px 14px;
+  }
+  .card-name{
+    font-size: 18px;
+    font-weight:bold;
+    color: var(--neon-amber);
+    text-shadow: 0 0 4px rgba(255,182,39,0.5);
+    margin: 0 0 6px;
+  }
+  .card-meta{
+    display:flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #c9b28c;
+    margin-bottom: 8px;
+  }
+  .liked{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size: 13px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight:bold;
+  }
+  .liked.yes{
+    color:#7dffb0;
+    border:1px solid #7dffb0;
+    text-shadow: 0 0 5px #7dffb0;
+    box-shadow: 0 0 6px rgba(125,255,176,0.4);
+  }
+  .liked.no{
+    color:#ff5c5c;
+    border:1px solid #ff5c5c;
+    text-shadow: 0 0 5px #ff5c5c;
+    box-shadow: 0 0 6px rgba(255,92,92,0.4);
+  }
+  .liked.na{
+    color:#aaa;
+    border:1px solid #666;
+  }
+  .genre-badge{
+    display:inline-block;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    text-shadow: 0 0 4px var(--neon-blue);
+    margin-left: 6px;
+  }
+  .stars{
+    color: var(--neon-amber);
+    text-shadow: 0 0 5px rgba(255,182,39,0.6);
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+  .rank-badge{
+    position:absolute;
+    top:8px;
+    left:8px;
+    background: var(--wood-dark);
+    border: 1px solid var(--neon-amber);
+    color: var(--neon-amber);
+    text-shadow: 0 0 6px var(--neon-amber);
+    font-weight:bold;
+    font-size: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(255,182,39,0.4);
+  }
+  .star-picker{
+    display:flex;
+    gap:6px;
+    margin-top:4px;
+  }
+  .star-picker span{
+    font-size: 24px;
+    cursor:pointer;
+    color:#4a3620;
+    transition: color .1s;
+  }
+  .star-picker span.filled{
+    color: var(--neon-amber);
+    text-shadow: 0 0 6px var(--neon-amber);
+  }
+  .card-note{
+    font-size: 12.5px;
+    color: #b7a184;
+    font-style: italic;
+    margin-top: 6px;
+    min-height: 14px;
+  }
+  .card-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .icon-btn{
+    background: none;
+    border: none;
+    color: #d8c4a0;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.75;
+    transition: opacity .15s;
+  }
+  .icon-btn:hover{ opacity:1; color: var(--neon-pink); }
+
+  .empty{
+    text-align:center;
+    color: #a58f6d;
+    padding: 60px 20px;
+    font-style: italic;
+  }
+
+  /* Modal */
+  .modal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal{
+    background: linear-gradient(160deg, #241609, #150d08);
+    border: 1px solid var(--neon-amber);
+    box-shadow: 0 0 24px rgba(255,182,39,0.25);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 22px;
+  }
+  .modal h2{
+    margin-top:0;
+    color: var(--neon-amber);
+    text-shadow: 0 0 6px var(--neon-amber);
+    font-size: 22px;
+  }
+  label{
+    display:block;
+    font-size: 13px;
+    color: var(--neon-blue);
+    margin: 14px 0 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  input[type="number"], input[type="text"], textarea{
+    width:100%;
+    background: #1a110b;
+    border: 1px solid #5a4128;
+    color: var(--text);
+    padding: 9px 10px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  textarea{ resize: vertical; min-height: 50px; }
+  .like-choice{
+    display:flex;
+    gap:8px;
+    margin-top:4px;
+  }
+  .like-choice button{
+    flex:1;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid #5a4128;
+    background: #1a110b;
+    color: var(--text);
+    cursor:pointer;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .like-choice button.active-yes{
+    border-color:#7dffb0; color:#7dffb0; box-shadow: 0 0 8px rgba(125,255,176,0.4);
+  }
+  .like-choice button.active-no{
+    border-color:#ff5c5c; color:#ff5c5c; box-shadow: 0 0 8px rgba(255,92,92,0.4);
+  }
+  .photo-input-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:6px;
+  }
+  .photo-preview{
+    width:64px; height:64px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #5a4128;
+    background:#0f0a06 center/cover;
+  }
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .btn-secondary{
+    background:none;
+    border:1px solid #666;
+    color:#ccc;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor:pointer;
+    font-family: inherit;
+  }
+  footer{
+    text-align:center;
+    color:#8a785c;
+    font-size:12px;
+    padding: 10px 0 30px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍺 MA CAVE À BIÈRE</h1>
+  <div class="subtitle">Le p'tit carnet du bar</div>
+</header>
+
+<div class="container">
+  <div class="toolbar">
+    <button class="neon-btn" id="addBtn">+ Ajouter une bière</button>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="🔍 Rechercher une bière...">
+    <select id="likeFilter">
+      <option value="all">Toutes</option>
+      <option value="yes">👍 Aimées</option>
+      <option value="no">👎 Pas aimées</option>
+      <option value="na">Pas encore notées</option>
+    </select>
+    <select id="genreFilter">
+      <option value="all">Tous les styles</option>
+    </select>
+    <select id="sortSelect">
+      <option value="recent">Plus récentes</option>
+      <option value="name">Nom (A-Z)</option>
+      <option value="degree">Degré</option>
+      <option value="price">Prix</option>
+      <option value="classement">🏆 Classement (meilleures)</option>
+    </select>
+  </div>
+
+  <div class="toolbar" style="margin-bottom:18px;">
+    <button class="neon-btn blue" id="top3Btn">🏆 Voir le Top 3</button>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="emptyMsg" class="empty" style="display:none;">Ta cave est vide pour l'instant... Ajoute ta première bière ! 🍻</div>
+</div>
+
+<footer>Enregistré sur cet appareil, dans ce navigateur.</footer>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h2 id="modalTitle">Ajouter une bière</h2>
+    <input type="hidden" id="beerId">
+
+    <label>Nom de la bière</label>
+    <input type="text" id="beerName" placeholder="Ex: Leffe Blonde">
+
+    <label>Photo</label>
+    <div class="photo-input-row">
+      <img id="photoPreview" class="photo-preview" src="">
+      <input type="file" id="photoInput" accept="image/*">
+    </div>
+
+    <label>Style / Genre</label>
+    <select id="beerGenre">
+      <option value="">— Choisir —</option>
+      <option value="Blonde">Blonde</option>
+      <option value="Brune">Brune</option>
+      <option value="Ambrée">Ambrée</option>
+      <option value="Blanche">Blanche</option>
+      <option value="IPA">IPA</option>
+      <option value="Triple">Triple</option>
+      <option value="Stout">Stout</option>
+      <option value="Fruitée">Fruitée</option>
+      <option value="Lager">Lager</option>
+      <option value="Sans alcool">Sans alcool</option>
+      <option value="Autre">Autre</option>
+    </select>
+    <input type="text" id="beerGenreOther" placeholder="Précise le style..." style="margin-top:6px; display:none;">
+
+    <label>Degré d'alcool (%)</label>
+    <input type="number" id="beerDegree" step="0.1" min="0" placeholder="Ex: 6.6">
+
+    <label>Prix (€)</label>
+    <input type="number" id="beerPrice" step="0.01" min="0" placeholder="Ex: 2.50">
+
+    <label>Tu as aimé ?</label>
+    <div class="like-choice">
+      <button type="button" id="likeYesBtn">👍 Oui</button>
+      <button type="button" id="likeNoBtn">👎 Non</button>
+      <button type="button" id="likeNaBtn">🤷 Pas encore</button>
+    </div>
+
+    <label>Classement (pour le top)</label>
+    <div class="star-picker" id="starPicker">
+      <span data-val="1">★</span>
+      <span data-val="2">★</span>
+      <span data-val="3">★</span>
+      <span data-val="4">★</span>
+      <span data-val="5">★</span>
+    </div>
+
+    <label>Note (facultatif)</label>
+    <textarea id="beerNote" placeholder="Ton avis, où tu l'as trouvée..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelBtn">Annuler</button>
+      <button class="neon-btn blue" id="saveBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'ma-cave-a-biere-liste';
+  let beers = [];
+  let currentLike = 'na';
+  let currentPhoto = '';
+  let currentRating = 0;
+  let editingId = null;
+  let showTop3Only = false;
+
+  function loadBeers(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      beers = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      beers = [];
+    }
+  }
+  function saveBeers(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(beers));
+    }catch(e){
+      console.error('Impossible de sauvegarder', e);
+    }
+  }
+
+  const grid = document.getElementById('grid');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+
+  function render(){
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    const likeFilter = document.getElementById('likeFilter').value;
+    const genreFilter = document.getElementById('genreFilter').value;
+    let sortBy = document.getElementById('sortSelect').value;
+
+    populateGenreFilter();
+
+    let list = beers.filter(b => {
+      const matchSearch = !search || b.name.toLowerCase().includes(search);
+      const matchLike = likeFilter === 'all' || b.liked === likeFilter;
+      const matchGenre = genreFilter === 'all' || (b.genre || '') === genreFilter;
+      return matchSearch && matchLike && matchGenre;
+    });
+
+    if(showTop3Only){
+      sortBy = 'classement';
+      list = list.filter(b => (b.rating || 0) > 0);
+    }
+
+    if(sortBy === 'name'){
+      list.sort((a,b) => a.name.localeCompare(b.name));
+    } else if(sortBy === 'degree'){
+      list.sort((a,b) => (b.degree||0) - (a.degree||0));
+    } else if(sortBy === 'price'){
+      list.sort((a,b) => (b.price||0) - (a.price||0));
+    } else if(sortBy === 'classement'){
+      list.sort((a,b) => (b.rating||0) - (a.rating||0) || (b.createdAt||0) - (a.createdAt||0));
+    } else {
+      list.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    }
+
+    if(showTop3Only){
+      list = list.slice(0, 3);
+    }
+
+    grid.innerHTML = '';
+    const nothingToShow = list.length === 0;
+    emptyMsg.style.display = nothingToShow ? 'block' : 'none';
+    emptyMsg.textContent = (showTop3Only && beers.length > 0 && nothingToShow)
+      ? "Note au moins une bière avec des étoiles pour voir ton Top 3 ! ⭐"
+      : "Ta cave est vide pour l'instant... Ajoute ta première bière ! 🍻";
+
+    list.forEach((b, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.position = 'relative';
+
+      const likeLabel = b.liked === 'yes' ? '👍 Aimée' : b.liked === 'no' ? '👎 Pas aimée' : '🤷 Pas notée';
+      const likeClass = b.liked === 'yes' ? 'yes' : b.liked === 'no' ? 'no' : 'na';
+
+      const photoHtml = b.photo
+        ? `<img class="card-photo" src="${b.photo}" alt="${escapeHtml(b.name)}">`
+        : `<div class="card-photo placeholder">🍺</div>`;
+
+      const rankBadge = (sortBy === 'classement' && (b.rating||0) > 0)
+        ? `<div class="rank-badge">${index+1}</div>` : '';
+
+      const genreBadge = b.genre ? `<span class="genre-badge">${escapeHtml(b.genre)}</span>` : '';
+      const starsHtml = b.rating ? `<div class="stars">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}</div>` : '';
+
+      card.innerHTML = `
+        ${rankBadge}
+        ${photoHtml}
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(b.name)}${genreBadge}</div>
+          <div class="card-meta">
+            <span>${b.degree !== '' && b.degree !== null ? b.degree + '°' : '—'}</span>
+            <span>${b.price !== '' && b.price !== null ? b.price + ' €' : '—'}</span>
+          </div>
+          <span class="liked ${likeClass}">${likeLabel}</span>
+          ${starsHtml}
+          <div class="card-note">${escapeHtml(b.note || '')}</div>
+          <div class="card-actions">
+            <button class="icon-btn" data-action="edit" data-id="${b.id}" title="Modifier">✏️</button>
+            <button class="icon-btn" data-action="delete" data-id="${b.id}" title="Supprimer">🗑️</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function populateGenreFilter(){
+    const sel = document.getElementById('genreFilter');
+    const current = sel.value;
+    const genres = Array.from(new Set(beers.map(b => b.genre).filter(Boolean))).sort();
+    sel.innerHTML = '<option value="all">Tous les styles</option>' +
+      genres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+    if(genres.includes(current)) sel.value = current;
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === 'delete'){
+      if(confirm('Supprimer cette bière de la cave ?')){
+        beers = beers.filter(b => b.id !== id);
+        saveBeers();
+        render();
+      }
+    } else if(btn.dataset.action === 'edit'){
+      openModal(beers.find(b => b.id === id));
+    }
+  });
+
+  function setLikeUI(val){
+    currentLike = val;
+    document.getElementById('likeYesBtn').className = val === 'yes' ? 'active-yes' : '';
+    document.getElementById('likeNoBtn').className = val === 'no' ? 'active-no' : '';
+    document.getElementById('likeNaBtn').className = '';
+  }
+
+  document.getElementById('likeYesBtn').addEventListener('click', () => setLikeUI('yes'));
+  document.getElementById('likeNoBtn').addEventListener('click', () => setLikeUI('no'));
+  document.getElementById('likeNaBtn').addEventListener('click', () => setLikeUI('na'));
+
+  document.getElementById('beerGenre').addEventListener('change', (e) => {
+    document.getElementById('beerGenreOther').style.display = e.target.value === 'Autre' ? 'block' : 'none';
+  });
+
+  function setRatingUI(val){
+    currentRating = val;
+    document.querySelectorAll('#starPicker span').forEach(s => {
+      s.classList.toggle('filled', parseInt(s.dataset.val) <= val);
+    });
+  }
+  document.getElementById('starPicker').addEventListener('click', (e) => {
+    const span = e.target.closest('span[data-val]');
+    if(!span) return;
+    const val = parseInt(span.dataset.val);
+    // clicking the same top star again resets to 0
+    setRatingUI(val === currentRating ? 0 : val);
+  });
+
+  document.getElementById('top3Btn').addEventListener('click', () => {
+    showTop3Only = !showTop3Only;
+    document.getElementById('top3Btn').textContent = showTop3Only ? '✖ Quitter le Top 3' : '🏆 Voir le Top 3';
+    render();
+  });
+
+  document.getElementById('photoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      currentPhoto = reader.result;
+      document.getElementById('photoPreview').src = currentPhoto;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function openModal(beer){
+    editingId = beer ? beer.id : null;
+    modalTitle.textContent = beer ? 'Modifier la bière' : 'Ajouter une bière';
+    document.getElementById('beerName').value = beer ? beer.name : '';
+    document.getElementById('beerDegree').value = beer ? beer.degree : '';
+    document.getElementById('beerPrice').value = beer ? beer.price : '';
+    document.getElementById('beerNote').value = beer ? (beer.note || '') : '';
+    currentPhoto = beer ? (beer.photo || '') : '';
+    document.getElementById('photoPreview').src = currentPhoto || '';
+    document.getElementById('photoInput').value = '';
+    setLikeUI(beer ? beer.liked : 'na');
+    setRatingUI(beer ? (beer.rating || 0) : 0);
+
+    const genreSelect = document.getElementById('beerGenre');
+    const genreOther = document.getElementById('beerGenreOther');
+    const knownGenres = Array.from(genreSelect.options).map(o => o.value);
+    if(beer && beer.genre && !knownGenres.includes(beer.genre)){
+      genreSelect.value = 'Autre';
+      genreOther.style.display = 'block';
+      genreOther.value = beer.genre;
+    } else {
+      genreSelect.value = beer ? (beer.genre || '') : '';
+      genreOther.style.display = 'none';
+      genreOther.value = '';
+    }
+
+    modalBackdrop.classList.add('open');
+  }
+  function closeModal(){
+    modalBackdrop.classList.remove('open');
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', (e) => {
+    if(e.target === modalBackdrop) closeModal();
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const name = document.getElementById('beerName').value.trim();
+    if(!name){
+      alert('Donne un nom à ta bière !');
+      return;
+    }
+    const degree = document.getElementById('beerDegree').value;
+    const price = document.getElementById('beerPrice').value;
+    const note = document.getElementById('beerNote').value.trim();
+    const genreSelectVal = document.getElementById('beerGenre').value;
+    const genre = genreSelectVal === 'Autre'
+      ? document.getElementById('beerGenreOther').value.trim()
+      : genreSelectVal;
+
+    if(editingId){
+      const b = beers.find(x => x.id === editingId);
+      b.name = name;
+      b.degree = degree === '' ? '' : parseFloat(degree);
+      b.price = price === '' ? '' : parseFloat(price);
+      b.note = note;
+      b.liked = currentLike;
+      b.photo = currentPhoto;
+      b.genre = genre;
+      b.rating = currentRating;
+    } else {
+      beers.push({
+        id: 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        name,
+        degree: degree === '' ? '' : parseFloat(degree),
+        price: price === '' ? '' : parseFloat(price),
+        note,
+        liked: currentLike,
+        photo: currentPhoto,
+        genre,
+        rating: currentRating,
+        createdAt: Date.now()
+      });
+    }
+    saveBeers();
+    closeModal();
+    render();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', render);
+  document.getElementById('likeFilter').addEventListener('change', render);
+  document.getElementById('genreFilter').addEventListener('change', render);
+  document.getElementById('sortSelect').addEventListener('change', render);
+
+  loadBeers();
+  render();
+</script>
+</body>
+</html>
